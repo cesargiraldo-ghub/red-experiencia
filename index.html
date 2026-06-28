@@ -28,6 +28,9 @@
   .gate{position:absolute;inset:0;z-index:60;background:radial-gradient(120% 90% at 50% 35%,#14171b,#000 75%);
     display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px;gap:20px;transition:opacity .8s}
   .gate .mark{font-family:'Anton';font-size:13px;letter-spacing:.5em;color:var(--blood);text-indent:.5em}
+  .brandlogo{height:58px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 20px rgba(244,6,10,.4))}
+  .brandlogo.sm{height:40px;opacity:.95;margin-bottom:8px}
+  .brandlogo.xs{height:48px;opacity:1;margin-bottom:16px}
   .gate h1{font-family:'Anton';font-size:clamp(30px,9vw,44px);line-height:.98;text-transform:uppercase}
   .gate h1 .red{color:var(--blood)}
   .gate p{color:var(--ash);font-size:15px;max-width:300px;line-height:1.55}
@@ -47,7 +50,7 @@
     display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px;gap:14px}
   .seg.show{display:flex;animation:fade .6s ease}
   @keyframes fade{from{opacity:0}to{opacity:1}}
-  .seg .mark{font-family:'Anton';letter-spacing:.34em;font-size:11px;color:var(--blood);text-indent:.34em}
+  .seg .mark{font-family:'Anton';letter-spacing:.2em;font-size:13px;color:var(--ember);text-indent:.2em;text-shadow:0 0 16px rgba(255,70,60,.45)}
   .seg h2{font-family:'Anton';font-size:clamp(24px,7vw,34px);text-transform:uppercase;line-height:1}
   .seg p{color:var(--ash);font-size:14px;margin-bottom:8px}
   .segbtn{width:100%;max-width:330px;background:var(--graphite);border:1px solid rgba(244,6,10,.25);color:var(--bone);
@@ -62,8 +65,9 @@
   .top{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:14px 16px;background:#10161c;
     border-bottom:1px solid rgba(255,255,255,.05);position:relative;z-index:5}
   .avatar{width:42px;height:42px;border-radius:50%;flex:0 0 auto;background:radial-gradient(circle at 30% 25%,#2a2f35,#0e1216);
-    display:flex;align-items:center;justify-content:center;font-family:'Anton';color:var(--blood);font-size:18px;
+    display:flex;align-items:center;justify-content:center;font-family:'Anton';color:var(--blood);font-size:18px;overflow:hidden;
     box-shadow:0 0 0 2px var(--blood),0 0 14px rgba(244,6,10,.4)}
+  .avatar img{width:100%;height:100%;object-fit:contain;padding:5px}
   .top .meta{display:flex;flex-direction:column;line-height:1.25;min-width:0}
   .top .meta b{font-size:15px;font-weight:700}
   .top .meta span{font-size:12px;color:var(--blood);display:flex;align-items:center;gap:5px;height:15px}
@@ -183,7 +187,7 @@
   .offer{position:absolute;inset:0;z-index:50;overflow-y:auto;background:radial-gradient(120% 80% at 50% 0%,rgba(244,6,10,.16),transparent 55%),#06090c;
     display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:40px 26px 40px;gap:6px;opacity:0;pointer-events:none;transition:opacity .6s}
   .offer.show{opacity:1;pointer-events:auto}
-  .offer .ey{font-family:'Anton';letter-spacing:.32em;font-size:11px;color:var(--blood);text-indent:.32em;margin-bottom:6px}
+  .offer .ey{font-family:'Anton';letter-spacing:.2em;font-size:12.5px;color:var(--ember);text-indent:.2em;margin-bottom:6px;text-shadow:0 0 16px rgba(255,70,60,.4)}
   .offer h2{font-family:'Anton';font-size:clamp(26px,7.5vw,36px);line-height:1.04;text-transform:uppercase}
   .offer h2 em{color:var(--blood);font-style:normal}
   .offer .sub{color:var(--ash);font-size:14px;line-height:1.55;max-width:330px;margin:10px 0 18px}
@@ -222,7 +226,7 @@
 
   <!-- ENTRY -->
   <div class="gate" id="gate">
-    <div class="mark">RED · REAL ESTATE</div>
+    <img class="brandlogo" src="https://assets.cdn.filesafe.space/edHddtwNySAbsqZNRk0E/media/68b9aed557df8a68d1e480c1.png" alt="RED">
     <h1>ESTO NO ES<br>UN <span class="red">ANUNCIO</span>.</h1>
     <p>Es lo que le pasó a alguien como tú. Esta semana. Mientras dormía.</p>
     <div class="vol"><div class="wave"><i></i><i></i><i></i><i></i></div>SÚBELE EL VOLUMEN</div>
@@ -232,9 +236,10 @@
 
   <!-- SEGMENT -->
   <div class="seg" id="seg">
-    <div class="mark">UNA PREGUNTA ANTES DE EMPEZAR</div>
-    <h2>¿Quién<br>eres?</h2>
-    <p>Para mostrarte exactamente lo tuyo.</p>
+    <img class="brandlogo xs" src="https://assets.cdn.filesafe.space/edHddtwNySAbsqZNRk0E/media/68b9aed557df8a68d1e480c1.png" alt="RED">
+    <div class="mark">ANTES DE COMENZAR</div>
+    <h2>¿Cuál es<br>tu perfil?</h2>
+    <p>Para mostrarte exactamente lo que aplica a tu caso.</p>
     <button class="segbtn" data-seg="agente"><span class="e">🧍</span><div><b>Soy asesor independiente</b><span>Trabajo solo. Mis leads, mi cartera, mi tiempo.</span></div></button>
     <button class="segbtn" data-seg="inmobiliaria"><span class="e">🏢</span><div><b>Tengo mi propia inmobiliaria</b><span>Tengo equipo, oficina y todo pasa por mí.</span></div></button>
     <button class="segbtn" data-seg="constructora"><span class="e">🏗️</span><div><b>Soy constructora / desarrolladora</b><span>Tengo proyectos y una sala de ventas que alimentar.</span></div></button>
@@ -245,7 +250,7 @@
   </button>
 
   <div class="top" id="topbar" style="visibility:hidden">
-    <div class="avatar">R</div>
+    <div class="avatar"><img src="https://assets.cdn.filesafe.space/edHddtwNySAbsqZNRk0E/media/68b0e45669974080bf7c8812.png" alt="RED"></div>
     <div class="meta"><b>RED · Inteligencia Inmobiliaria</b><span id="status" class="idle">en línea</span></div>
     <div class="icons">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1v-3.5l4 4v-11l-4 4z"/></svg>
@@ -270,6 +275,7 @@
 
   <!-- OFFER -->
   <div class="offer" id="offer">
+    <img class="brandlogo sm" src="https://assets.cdn.filesafe.space/edHddtwNySAbsqZNRk0E/media/68b9aed557df8a68d1e480c1.png" alt="RED">
     <div class="ey" id="offerEy">LO QUE VINISTE A VER</div>
     <h2 id="offerH2"></h2>
     <p class="sub" id="offerSub"></p>
@@ -285,7 +291,6 @@
     <button class="replay" id="replayBtn">↺ Volver a vivir la experiencia</button>
   </div>
 
-  <div class="demo-note">PROTOTIPO · RED EXPERIENCE</div>
 </div></div>
 
 <script>
@@ -331,7 +336,18 @@
   }
   async function them(text,{big=false,wait=900,after=480}={}){await typing(wait);msg(text,false,big);await sleep(after);}
 
-  function voiceNote(who,text,seconds){return new Promise(resolve=>{
+  // Reproduce un MP3 real desde audios/. Si no existe (404) o falla, devuelve false
+  // para que voiceNote use la voz sintética como respaldo. Nunca rompe la experiencia.
+  function playFile(src,onDur){return new Promise(res=>{
+    if(muted){res(false);return;}
+    const a=new Audio();a.src=src;let settled=false;
+    a.addEventListener("loadedmetadata",()=>{if(isFinite(a.duration)&&a.duration>0&&onDur)onDur(a.duration);});
+    a.addEventListener("ended",()=>{if(!settled){settled=true;res(true);}});
+    a.addEventListener("error",()=>{if(!settled){settled=true;res(false);}});
+    a.play().catch(()=>{if(!settled){settled=true;res(false);}});
+  });}
+
+  function voiceNote(who,text,seconds,src){return new Promise(resolve=>{
     const row=document.createElement("div");row.className="row them";
     const bub=document.createElement("div");bub.className="bubble voice";
     const bars=Array.from({length:22},()=>'<i></i>').join("");
@@ -340,13 +356,17 @@
       <div class="wf">${bars}</div><span class="dur">${fmt(seconds)}</span></div>`;
     row.appendChild(bub);chat.appendChild(row);scrollDown();tick(500,0.05,0.045);
     const pl=bub.querySelector(".pl"),bars2=bub.querySelectorAll(".wf i"),dur=bub.querySelector(".dur");
-    let played=false,raf=null,start=0;
-    const animate=()=>{const el=Math.min(seconds,(Date.now()-start)/1000);
+    let played=false,raf=null,start=0,done=false,target=seconds;
+    const animate=()=>{const el=(Date.now()-start)/1000;
       bars2.forEach((b,i)=>{b.style.height=(20+Math.abs(Math.sin((el*6)+(i*.7)))*72)+"%";});
-      dur.textContent=fmt(Math.max(0,seconds-el));if(el<seconds)raf=requestAnimationFrame(animate);};
+      dur.textContent=fmt(Math.max(0,target-el));if(!done)raf=requestAnimationFrame(animate);};
     pl.addEventListener("click",async()=>{if(played)return;played=true;bub.classList.add("playing");
       pl.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
-      start=Date.now();animate();await speak(text);cancelAnimationFrame(raf);bub.classList.remove("playing");
+      start=Date.now();animate();
+      let ok=false;
+      if(src){try{ok=await playFile(src,d=>{target=d;});}catch(e){ok=false;}}
+      if(!ok){await speak(text);}
+      done=true;cancelAnimationFrame(raf);bub.classList.remove("playing");
       bars2.forEach(b=>b.style.height="30%");dur.textContent=fmt(seconds);
       pl.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';await sleep(450);resolve();});
   });}
@@ -436,7 +456,7 @@
     await them(frame.mlsLine);
   }
   async function sharedClose(seg){
-    await voiceNote("César Giraldo · CEO RED","Yo cerré una franquicia internacional para construir esto. Porque entendí algo: en el sector inmobiliario, el que tiene la tecnología, gana. Mi misión es que esa tecnología seas tú.",13);
+    await voiceNote("César Giraldo · CEO RED","Yo cerré una franquicia internacional para construir esto. Porque entendí algo: en el sector inmobiliario, el que tiene la tecnología, gana. Y mi misión es que esa tecnología seas tú. Una hora. Es lo único que te pido. Nos vemos del otro lado.",14,"audios/cesar.ogg");
     await videoCard("V·CESAR","🎬 César a cámara · la invitación","NO COMPITES CONTRA AGENTES. COMPITES CONTRA QUIEN TIENE TECNOLOGÍA.","Talking head de César (real o avatar HeyGen). 20–25 s. La visión + invitación a la cita.",24);
     await interstitial("FALTA UNA COSA.","LO QUE NO SABÍAS QUE IBAS A VER.");
   }
@@ -451,7 +471,7 @@
     await choices([{label:"Es mi vida 😮‍💨"},{label:"Demasiado real…"}]);
     await them("Lo respondes. Siempre lo respondes.");
     await them("Porque si no contestas en 5 minutos, ese lead ya está hablando con otro asesor.");
-    await voiceNote("RED","El setenta y ocho por ciento de los clientes cierran con el primero que les responde. No con el mejor. Con el primero. Por eso vives pegado al teléfono: en el almuerzo, en la noche, el domingo.",13);
+    await voiceNote("RED","El setenta y ocho por ciento de los clientes cierran con el primero que les responde. No con el mejor. Con el primero. Por eso vives pegado al teléfono: en el almuerzo, en la noche, el domingo.",13,"audios/red-agente.ogg");
     await videoCard("V·A1","📱 El celular que nunca se apaga","ESCLAVO DE TU PROPIO TELÉFONO","B-roll cinemático: asesor de noche, ciudad, teléfono que brilla sin parar. 15–20 s. Sin diálogo.",18);
     await them("Y mientras corres detrás de cada lead… casi nunca tienes el inmueble exacto que te piden.");
     await choices([{label:"Verdad, me toca rebuscar"},{label:"Ese es otro dolor"}]);
@@ -490,7 +510,7 @@
     await them("Y tú te enteraste… cuando el cliente ya cerró con otra inmobiliaria.",{big:true,wait:900});
     await choices([{label:"Me pasó esta semana"},{label:"Uf, exacto"}]);
     await them("Lo peor: no sabes cuántos leads entraron, cuántos se atendieron, cuántos se perdieron.");
-    await voiceNote("RED","Una inmobiliaria promedio pierde casi la mitad de sus leads por no responder a tiempo y por falta de seguimiento. No es que falten clientes. Es que se escapan sin que nadie se entere.",12);
+    await voiceNote("RED","Una inmobiliaria promedio pierde casi la mitad de sus leads por no responder a tiempo y por falta de seguimiento. No es que falten clientes. Es que se escapan sin que nadie se entere.",12,"audios/red-inmobiliaria.ogg");
     await videoCard("V·I1","🏢 La oficina y los leads que se escapan","NO TE FALTAN LEADS. SE TE ESCAPAN.","B-roll: oficina activa, teléfonos sonando, notificaciones sin leer apilándose. 15–20 s.",18);
     await interstitial("¿Y SI VIERAS TODO","EN UN SOLO LUGAR?");
     await them("Mira lo que pasa cuando entra un lead a una inmobiliaria con RED. Nadie tocó el teléfono.");
@@ -521,7 +541,7 @@
     await them("Pero buena parte de esos leads <b>nunca</b> recibe respuesta a tiempo. Y los que responden, no están calificados.",{big:true,wait:900});
     await choices([{label:"Me suena carísimo"},{label:"Sí, ese es el hueco"}]);
     await them("Tu sala de ventas depende de personas. No de un sistema. Y eso no escala.");
-    await voiceNote("RED","Una constructora puede quemar el sesenta por ciento de su inversión en pauta en leads que nunca se atienden bien. El problema casi nunca es el proyecto. Es la velocidad y la calificación.",13);
+    await voiceNote("RED","Una constructora puede quemar el sesenta por ciento de su inversión en pauta en leads que nunca se atienden bien. El problema casi nunca es el proyecto. Es la velocidad y la calificación.",13,"audios/red-constructora.ogg");
     await videoCard("V·C1","🏗️ La sala de ventas y la pauta quemada","PAGAS POR LEADS QUE NADIE ATIENDE","B-roll cinemático: render de proyecto, sala de ventas, gráfica de inversión publicitaria. 15–20 s.",18);
     await interstitial("¿Y SI CADA LEAD","SE CALIFICARA SOLO?");
     await them("Así responde la IA de RED a un comprador de tu proyecto. 24/7, sin que tu equipo levante un dedo.");
