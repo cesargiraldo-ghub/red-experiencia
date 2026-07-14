@@ -107,13 +107,32 @@
   /* VIDEO CARD */
   .vid{width:100%;max-width:78%;border-radius:16px;overflow:hidden;cursor:pointer;position:relative;animation:rise .4s ease;
     border:1px solid rgba(255,255,255,.07);background:#0c1116}
-  .vid .thumb{position:relative;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;
+  .vid .thumb{position:relative;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;overflow:hidden;
     background:linear-gradient(135deg,#1a2128,#0c1014)}
-  .vid .thumb::after{content:"";position:absolute;inset:0;
+  .vid .vprev{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;z-index:1}
+  .vid.ready .vprev{opacity:.75}
+  .vid .thumb::after{content:"";position:absolute;inset:0;z-index:2;
     background:radial-gradient(80% 60% at 30% 30%,rgba(244,6,10,.22),transparent 60%),
-    radial-gradient(70% 70% at 80% 80%,rgba(58,124,255,.10),transparent 60%);mix-blend-mode:screen}
-  .vid .scene{position:absolute;top:9px;left:10px;font-size:11px;color:var(--ash);z-index:2;max-width:75%;line-height:1.3}
-  .vid .pbtn{position:relative;z-index:2;width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.45);
+    radial-gradient(70% 70% at 80% 80%,rgba(58,124,255,.10),transparent 60%),
+    linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55));mix-blend-mode:normal}
+  /* puntos de carga mientras el video se precarga en segundo plano */
+  .vid .vloading{position:absolute;bottom:10px;right:11px;z-index:4;display:flex;gap:4px}
+  .vid .vloading i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.75);animation:tp 1.2s infinite}
+  .vid .vloading i:nth-child(2){animation-delay:.18s}
+  .vid .vloading i:nth-child(3){animation-delay:.36s}
+  .vid.ready .vloading{display:none}
+  /* CTA "Ver video" estilo WhatsApp */
+  .vcta{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 12px;
+    background:var(--graphite-2);border-top:1px solid rgba(255,255,255,.06);
+    font-weight:700;font-size:14.5px;color:var(--bone);position:relative}
+  .vcta .vplay{display:flex;align-items:center;gap:7px;color:var(--blood)}
+  .vcta .vplay svg{width:15px;height:15px}
+  .vcta .vdur{position:absolute;right:12px;font-size:11px;color:var(--ash);font-weight:500}
+  .vid:active .vcta{background:#252e37}
+  .vid.seen .vcta{opacity:.55}
+  .vid .scene{position:absolute;top:9px;left:10px;font-size:11px;color:#fff;z-index:3;max-width:75%;line-height:1.3;
+    text-shadow:0 1px 6px rgba(0,0,0,.8)}
+  .vid .pbtn{position:relative;z-index:3;width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.45);
     backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center}
   .vid .pbtn svg{width:22px;height:22px;fill:#fff;margin-left:3px}
   .vid .vbar{display:flex;align-items:center;gap:8px;padding:8px 11px;font-size:11px;color:var(--ash);background:#0e141a}
@@ -135,6 +154,9 @@
   .vplayer .vp-caption{position:relative;z-index:2;text-align:center;padding:0 32px}
   .vplayer .vp-caption .ttl{font-family:'Anton';font-size:clamp(22px,7vw,32px);text-transform:uppercase;line-height:1.05;color:#fff}
   .vplayer .vp-caption .hint{margin-top:14px;font-size:12px;color:var(--ash);letter-spacing:.04em;line-height:1.5}
+  .spinner{width:38px;height:38px;border-radius:50%;border:3px solid rgba(255,255,255,.18);
+    border-top-color:var(--blood);animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
   .vplayer .vp-prog{height:3px;background:rgba(255,255,255,.15);position:relative}
   .vplayer .vp-prog i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--blood);box-shadow:0 0 10px var(--blood)}
   .vplayer .vp-skip{position:absolute;bottom:14px;right:16px;z-index:3;background:rgba(255,255,255,.1);border:none;color:#fff;
@@ -273,6 +295,9 @@
         <div class="vp-bg"></div><div class="vp-grain"></div>
         <div class="vp-caption"><div class="ttl" id="vpTitle"></div><div class="hint" id="vpHint"></div></div>
       </div>
+      <div id="vpSpin" style="display:none;position:absolute;inset:0;z-index:2;align-items:center;justify-content:center;pointer-events:none">
+        <div class="spinner"></div>
+      </div>
       <button class="vp-skip" id="vpSkip">Saltar ⏭</button>
     </div>
     <div class="vp-prog"><i id="vpBar"></i></div>
@@ -378,7 +403,7 @@
 
   /* VIDEO CARD + PLAYER */
   const vplayer=$("#vplayer"),vpBar=$("#vpBar"),vpTitle=$("#vpTitle"),vpHint=$("#vpHint");
-  const vpVideo=$("#vpVideo"),vpFallback=$("#vpFallback");
+  const vpVideo=$("#vpVideo"),vpFallback=$("#vpFallback"),vpSpin=$("#vpSpin");
   let vpResolve=null,vpRaf=null;
   function openPlayer(title,hint,realSeconds,src){
     return new Promise(resolve=>{
@@ -389,14 +414,19 @@
       if(src){
         vpFallback.style.display="none";
         vpVideo.style.display="block";
+        vpSpin.style.display="flex";
         vpVideo.src=src;
         vpVideo.muted=muted;
         vpVideo.currentTime=0;
         let failed=false;
-        vpVideo.onerror=()=>{ if(failed)return; failed=true; showFallback(title,hint); };
+        const hideSpin=()=>{vpSpin.style.display="none";};
+        vpVideo.onplaying=hideSpin;
+        vpVideo.oncanplay=hideSpin;
+        vpVideo.onwaiting=()=>{vpSpin.style.display="flex";};
+        vpVideo.onerror=()=>{ if(failed)return; failed=true; hideSpin(); showFallback(title,hint); };
         vpVideo.ontimeupdate=()=>{ if(vpVideo.duration) vpBar.style.width=((vpVideo.currentTime/vpVideo.duration)*100)+"%"; };
         vpVideo.onended=()=>closePlayer();
-        vpVideo.play().catch(()=>{ if(!failed){failed=true; showFallback(title,hint);} });
+        vpVideo.play().catch(()=>{ if(!failed){failed=true; hideSpin(); showFallback(title,hint);} });
         return;
       }
       showFallback(title,hint);
@@ -421,12 +451,35 @@
 
   function videoCard(code,label,title,hint,seconds,src,poster){return new Promise(resolve=>{
     const card=document.createElement("div");card.className="vid";
-    const bg = poster?`style="background-image:url('${poster}');background-size:cover;background-position:center"`:"";
-    card.innerHTML=`<div class="thumb" ${bg}><div class="scene">${label}</div>
-      <div class="pbtn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
-      <div class="vbar"><span class="rd">▶ RED te envió un video</span><span>${fmt(seconds)}</span><span class="code">${code}</span></div>`;
+    card.innerHTML=`<div class="thumb">
+        <video class="vprev" muted playsinline preload="auto" ${src?`src="${src}"`:""}></video>
+        <div class="scene">${label}</div>
+        <div class="pbtn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="vloading" aria-hidden="true"><i></i><i></i><i></i></div>
+      </div>
+      <div class="vcta">
+        <span class="vplay"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Ver video</span>
+        <span class="vdur">${fmt(seconds)}</span>
+      </div>
+      <div class="vbar"><span class="rd">▶ RED te envió un video</span><span class="code">${code}</span></div>`;
     chat.appendChild(card);scrollDown();tick(480,0.05,0.04);
-    card.addEventListener("click",async()=>{await openPlayer(title,hint,seconds,src);resolve();},{once:true});
+
+    // Precarga silenciosa: el video se descarga mientras la persona lee el chat.
+    const prev=card.querySelector(".vprev");
+    if(src && prev){
+      prev.addEventListener("loadeddata",()=>{
+        card.classList.add("ready");           // muestra el primer fotograma como miniatura
+        try{ prev.currentTime=0.1; }catch(e){}
+      });
+      prev.addEventListener("error",()=>card.classList.add("ready"));
+      try{ prev.load(); }catch(e){}
+    } else { card.classList.add("ready"); }
+
+    card.addEventListener("click",async()=>{
+      card.classList.add("seen");
+      await openPlayer(title,hint,seconds,src);
+      resolve();
+    },{once:true});
   });}
 
   async function liveDemo(headLabel,seq,panel){
