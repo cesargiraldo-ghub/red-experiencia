@@ -159,9 +159,6 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   .vplayer .vp-prog{height:3px;background:rgba(255,255,255,.15);position:relative}
   .vplayer .vp-prog i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--blood);box-shadow:0 0 10px var(--blood)}
-  .vplayer .vp-skip{position:absolute;bottom:14px;right:16px;z-index:3;background:rgba(255,255,255,.1);border:none;color:#fff;
-    font-size:11px;letter-spacing:.1em;padding:8px 16px;border-radius:100px;cursor:pointer;text-transform:uppercase}
-  .vplayer .placeholder{position:absolute;top:14px;left:16px;z-index:3;font-size:10px;color:var(--ash-dim);letter-spacing:.1em}
 
   /* LIVE DEMO */
   .demo{width:100%;max-width:92%;margin:4px 0;border-radius:16px;overflow:hidden;border:1px solid rgba(244,6,10,.3);background:#0c1216;
@@ -286,7 +283,6 @@
 
   <!-- VIDEO PLAYER -->
   <div class="vplayer" id="vplayer">
-    <div class="placeholder" id="vpPlaceholder">▸ AQUÍ VA TU VIDEO REAL</div>
     <div class="vp-top"><b style="color:var(--blood);font-family:Anton;letter-spacing:.1em">RED</b><button class="x" id="vpClose">×</button></div>
     <div class="vp-stage">
       <video id="vpVideo" playsinline preload="auto"
@@ -298,7 +294,6 @@
       <div id="vpSpin" style="display:none;position:absolute;inset:0;z-index:2;align-items:center;justify-content:center;pointer-events:none">
         <div class="spinner"></div>
       </div>
-      <button class="vp-skip" id="vpSkip">Saltar ⏭</button>
     </div>
     <div class="vp-prog"><i id="vpBar"></i></div>
   </div>
@@ -447,7 +442,6 @@
     const r=vpResolve;vpResolve=null;if(r)setTimeout(r,300);
   }
   $("#vpClose").addEventListener("click",closePlayer);
-  $("#vpSkip").addEventListener("click",closePlayer);
 
   function videoCard(code,label,title,hint,seconds,src,poster){return new Promise(resolve=>{
     const card=document.createElement("div");card.className="vid";
@@ -462,13 +456,25 @@
         <span class="vdur">${fmt(seconds)}</span>
       </div>
       <div class="vbar"><span class="rd">▶ RED te envió un video</span><span class="code">${code}</span></div>`;
-    chat.appendChild(card);scrollDown();tick(480,0.05,0.04);
+    chat.appendChild(card);
+    tick(480,0.05,0.04);
+
+    // Espacio extra abajo para que la tarjeta pueda subir y quedar centrada,
+    // en vez de pegada al borde inferior y cortada.
+    const spacer=document.createElement("div");
+    spacer.style.cssText="flex:0 0 auto;height:38vh;pointer-events:none";
+    chat.appendChild(spacer);
+
+    // Sube suavemente hasta centrar la tarjeta en la pantalla.
+    requestAnimationFrame(()=>{
+      card.scrollIntoView({behavior:"smooth",block:"center"});
+    });
 
     // Precarga silenciosa: el video se descarga mientras la persona lee el chat.
     const prev=card.querySelector(".vprev");
     if(src && prev){
       prev.addEventListener("loadeddata",()=>{
-        card.classList.add("ready");           // muestra el primer fotograma como miniatura
+        card.classList.add("ready");
         try{ prev.currentTime=0.1; }catch(e){}
       });
       prev.addEventListener("error",()=>card.classList.add("ready"));
@@ -478,6 +484,8 @@
     card.addEventListener("click",async()=>{
       card.classList.add("seen");
       await openPlayer(title,hint,seconds,src);
+      spacer.remove();          // libera el espacio y el chat sigue normal
+      scrollDown();
       resolve();
     },{once:true});
   });}
