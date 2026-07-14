@@ -266,8 +266,13 @@
   <div class="vplayer" id="vplayer">
     <div class="placeholder" id="vpPlaceholder">▸ AQUÍ VA TU VIDEO REAL</div>
     <div class="vp-top"><b style="color:var(--blood);font-family:Anton;letter-spacing:.1em">RED</b><button class="x" id="vpClose">×</button></div>
-    <div class="vp-stage"><div class="vp-bg"></div><div class="vp-grain"></div>
-      <div class="vp-caption"><div class="ttl" id="vpTitle"></div><div class="hint" id="vpHint"></div></div>
+    <div class="vp-stage">
+      <video id="vpVideo" playsinline preload="auto"
+        style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1"></video>
+      <div id="vpFallback" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <div class="vp-bg"></div><div class="vp-grain"></div>
+        <div class="vp-caption"><div class="ttl" id="vpTitle"></div><div class="hint" id="vpHint"></div></div>
+      </div>
       <button class="vp-skip" id="vpSkip">Saltar ⏭</button>
     </div>
     <div class="vp-prog"><i id="vpBar"></i></div>
@@ -373,29 +378,55 @@
 
   /* VIDEO CARD + PLAYER */
   const vplayer=$("#vplayer"),vpBar=$("#vpBar"),vpTitle=$("#vpTitle"),vpHint=$("#vpHint");
+  const vpVideo=$("#vpVideo"),vpFallback=$("#vpFallback");
   let vpResolve=null,vpRaf=null;
-  function openPlayer(title,hint,realSeconds){
+  function openPlayer(title,hint,realSeconds,src){
     return new Promise(resolve=>{
       vpResolve=resolve;vpTitle.textContent=title;vpHint.textContent=hint;
       vplayer.classList.add("show");vpBar.style.width="0%";drone();
-      const showFor=4800;const start=Date.now();
-      const step=()=>{const p=Math.min(1,(Date.now()-start)/showFor);vpBar.style.width=(p*100)+"%";
-        if(p<1)vpRaf=requestAnimationFrame(step);else closePlayer();};
-      vpRaf=requestAnimationFrame(step);
+
+      // Si hay MP4 real, lo reproduce. Si no existe (404) cae a la placa animada.
+      if(src){
+        vpFallback.style.display="none";
+        vpVideo.style.display="block";
+        vpVideo.src=src;
+        vpVideo.muted=muted;
+        vpVideo.currentTime=0;
+        let failed=false;
+        vpVideo.onerror=()=>{ if(failed)return; failed=true; showFallback(title,hint); };
+        vpVideo.ontimeupdate=()=>{ if(vpVideo.duration) vpBar.style.width=((vpVideo.currentTime/vpVideo.duration)*100)+"%"; };
+        vpVideo.onended=()=>closePlayer();
+        vpVideo.play().catch(()=>{ if(!failed){failed=true; showFallback(title,hint);} });
+        return;
+      }
+      showFallback(title,hint);
     });
   }
-  function closePlayer(){if(vpRaf)cancelAnimationFrame(vpRaf);vplayer.classList.remove("show");
-    const r=vpResolve;vpResolve=null;if(r)setTimeout(r,300);}
+  function showFallback(title,hint){
+    vpVideo.style.display="none";
+    vpFallback.style.display="flex";
+    const showFor=4800;const start=Date.now();
+    const step=()=>{const p=Math.min(1,(Date.now()-start)/showFor);vpBar.style.width=(p*100)+"%";
+      if(p<1)vpRaf=requestAnimationFrame(step);else closePlayer();};
+    vpRaf=requestAnimationFrame(step);
+  }
+  function closePlayer(){
+    if(vpRaf)cancelAnimationFrame(vpRaf);
+    try{ vpVideo.pause(); vpVideo.removeAttribute("src"); vpVideo.load(); }catch(e){}
+    vplayer.classList.remove("show");
+    const r=vpResolve;vpResolve=null;if(r)setTimeout(r,300);
+  }
   $("#vpClose").addEventListener("click",closePlayer);
   $("#vpSkip").addEventListener("click",closePlayer);
 
-  function videoCard(code,label,title,hint,seconds){return new Promise(resolve=>{
+  function videoCard(code,label,title,hint,seconds,src,poster){return new Promise(resolve=>{
     const card=document.createElement("div");card.className="vid";
-    card.innerHTML=`<div class="thumb"><div class="scene">${label}</div>
+    const bg = poster?`style="background-image:url('${poster}');background-size:cover;background-position:center"`:"";
+    card.innerHTML=`<div class="thumb" ${bg}><div class="scene">${label}</div>
       <div class="pbtn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
       <div class="vbar"><span class="rd">▶ RED te envió un video</span><span>${fmt(seconds)}</span><span class="code">${code}</span></div>`;
     chat.appendChild(card);scrollDown();tick(480,0.05,0.04);
-    card.addEventListener("click",async()=>{await openPlayer(title,hint,seconds);resolve();},{once:true});
+    card.addEventListener("click",async()=>{await openPlayer(title,hint,seconds,src);resolve();},{once:true});
   });}
 
   async function liveDemo(headLabel,seq,panel){
@@ -457,7 +488,7 @@
   }
   async function sharedClose(seg){
     await voiceNote("César Giraldo · CEO RED","Yo cerré una franquicia internacional para construir esto. Porque entendí algo: en el sector inmobiliario, el que tiene la tecnología, gana. Y mi misión es que esa tecnología seas tú. Una hora. Es lo único que te pido. Nos vemos del otro lado.",14,"audios/cesar.ogg");
-    await videoCard("V·CESAR","🎬 César a cámara · la invitación","NO COMPITES CONTRA AGENTES. COMPITES CONTRA QUIEN TIENE TECNOLOGÍA.","Talking head de César (real o avatar HeyGen). 20–25 s. La visión + invitación a la cita.",24);
+    await videoCard("V·CESAR","🎬 César a cámara · la invitación","NO COMPITES CONTRA AGENTES. COMPITES CONTRA QUIEN TIENE TECNOLOGÍA.","La visión detrás de RED.",24,"videos/v-cesar.mp4");
     await interstitial("FALTA UNA COSA.","LO QUE NO SABÍAS QUE IBAS A VER.");
   }
 
@@ -472,7 +503,7 @@
     await them("Lo respondes. Siempre lo respondes.");
     await them("Porque si no contestas en 5 minutos, ese lead ya está hablando con otro asesor.");
     await voiceNote("RED","El setenta y ocho por ciento de los clientes cierran con el primero que les responde. No con el mejor. Con el primero. Por eso vives pegado al teléfono: en el almuerzo, en la noche, el domingo.",13,"audios/red-agente.ogg");
-    await videoCard("V·A1","📱 El celular que nunca se apaga","ESCLAVO DE TU PROPIO TELÉFONO","B-roll cinemático: asesor de noche, ciudad, teléfono que brilla sin parar. 15–20 s. Sin diálogo.",18);
+    await videoCard("V·A1","📱 El celular que nunca se apaga","ESCLAVO DE TU PROPIO TELÉFONO","Son las 9:47 p.m. Otra vez.",10,"videos/v-a1.mp4");
     await them("Y mientras corres detrás de cada lead… casi nunca tienes el inmueble exacto que te piden.");
     await choices([{label:"Verdad, me toca rebuscar"},{label:"Ese es otro dolor"}]);
     await interstitial("¿Y SI NO TUVIERAS","QUE CONTESTAR TÚ?");
@@ -491,7 +522,7 @@
     await choices([{label:"¿Eso es real? 😳"},{label:"Yo quiero eso 🔥"}]);
     await them("100% real. Es IA entrenada con TU inventario, TUS zonas y TU forma de hablar.");
     await interstitial("MIENTRAS DORMÍAS,","TU NEGOCIO TRABAJÓ.");
-    await videoCard("V·A2","🤖 La IA trabajando de noche","TU MEJOR EMPLEADO NO DUERME","B-roll: interfaz de chat IA respondiendo sola, mensajes fluyendo, cita confirmada. 15–20 s.",18);
+    await videoCard("V·A2","🤖 La IA trabajando de noche","TU MEJOR EMPLEADO NO DUERME","Mientras dormías, tu negocio trabajó.",10,"videos/v-a2.mp4");
     await sharedNetwork({net:"asesores en Colombia. ¿Un cliente busca lo que no tienes? Lo pasas a la red y alguien te lo consigue.",
       netLine:"Nunca más pierdes un cliente por no tener el inmueble. Cierran juntos, ganan juntos."});
     await sharedMLS({mls:"inmuebles en el MLS de RED, listos para ofrecer hoy mismo. Sin captar desde cero.",
